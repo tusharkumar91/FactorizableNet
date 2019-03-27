@@ -244,7 +244,7 @@ def interpret_relationships(cls_prob, bbox_pred, rois, cls_prob_predicate,
         else:
             total_scores = predicate_scores[pred_list] * scores[sub_list] * scores[obj_list]
 
-        top_N_list = total_scores.argsort()[::-1][:10000]
+        top_N_list = total_scores.argsort()[::-1][:top_N]
         total_scores = total_scores[top_N_list]
         pred_ids = predicate_inds[pred_list[top_N_list]] # category of predicates
         sub_assignment = sub_list[top_N_list] # subjects assignments

@@ -20,6 +20,7 @@ from lib.rpn_msr.anchor_target_layer import anchor_target_layer
 
 class VRD(data.Dataset):
     def __init__(self, opts, image_set='train', batch_size=1, dataset_option=None, use_region=False):
+        print("init")
         super(VRD, self).__init__()
         self._name = image_set
         self.opts = opts
@@ -83,7 +84,7 @@ class VRD(data.Dataset):
         item['image_info'] = np.array([img.shape[0], img.shape[1], im_scale, 
                     img_original_shape[0], img_original_shape[1]], dtype=np.float)
         item['visual'] = Image.fromarray(img)
-
+        print("Info of image : {}".format(item['image_info']))
         if self.transform is not None:
             item['visual']  = self.transform(item['visual'])
 

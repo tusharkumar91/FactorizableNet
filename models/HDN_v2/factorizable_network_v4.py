@@ -65,6 +65,7 @@ class Factorizable_network(nn.Module):
             assert len(trainset.opts['test']['SCALES']) == 1, "Currently only support single testing scale."
             self.rpn_opts['scale'] = trainset.opts['test']['SCALES'][0]
 
+        print("RPN opts = {}".format(self.rpn_opts))
         self.rpn = RPN(self.rpn_opts)
         pool_size = self.opts.get('pool_size', 7)
         self.roi_pool_object = ROIAlign((pool_size, pool_size), 1.0/16, 0)

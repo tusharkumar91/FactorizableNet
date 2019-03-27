@@ -20,6 +20,7 @@ from lib.rpn_msr.anchor_target_layer import anchor_target_layer
 
 class visual_genome(data.Dataset):
     def __init__(self, opts, image_set='train', dataset_option='normal', batch_size=1, use_region=False):
+        print("init called)")
         self.opts = opts
         self.use_region = use_region
         self._name = 'vg_' + dataset_option + '_' + image_set

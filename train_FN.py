@@ -74,6 +74,8 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation and test set')
 parser.add_argument('-p', '--predict', dest='predict', action='store_true',
                     help='predict model on input image')
+parser.add_argument('--image_path', type=str,
+                    help='input image path to do prediction on')
 parser.add_argument('--evaluate_object', dest='evaluate_object', action='store_true',
                     help='Evaluate model with object detection')
 parser.add_argument('--use_normal_anchors', action='store_true', help='Whether to use kmeans anchors')
@@ -293,13 +295,17 @@ def main():
         return
 
     if args.predict:
-        result = model.module.engines.test(test_loader, model, top_Ns,
+        result = model.module.engines.predict(args.image_path, train_set, model, [20],
                                             nms=args.nms,
                                             triplet_nms=args.triplet_nms,
                                             use_gt_boxes=args.use_gt_boxes)
         print('======= Prediction Result =======')
         print(result)
         print('============ Done ============')
+        for relationship in result['relationships']:
+            print("Subject : {} | Rel : {} | Object : {}".format(train_set._object_classes[relationship[0]],
+                                                                 train_set._predicate_classes[relationship[2]],
+                                                                 train_set._object_classes[relationship[1]]))
         return
 
     if args.evaluate_object:
