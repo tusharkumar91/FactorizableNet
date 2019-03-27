@@ -132,8 +132,6 @@ class Factorizable_network(FN_v4):
 
     def forward_eval(self, im_data, im_info, gt_objects=None):
         # Currently, RPN support batch but not for MSDN
-        print("image_info in foreval = {}".format(im_info))
-        print(im_data.size())
         features, object_rois, _ = self.rpn(im_data, im_info)
         if gt_objects is not None:
             gt_rois = np.concatenate([np.zeros((gt_objects.shape[0], 1)),

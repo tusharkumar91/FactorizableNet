@@ -20,7 +20,6 @@ from lib.rpn_msr.anchor_target_layer import anchor_target_layer
 
 class VRD(data.Dataset):
     def __init__(self, opts, image_set='train', batch_size=1, dataset_option=None, use_region=False):
-        print("init")
         super(VRD, self).__init__()
         self._name = image_set
         self.opts = opts
