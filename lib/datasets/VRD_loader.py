@@ -55,6 +55,21 @@ class VRD(data.Dataset):
         self._feat_stride = None
         self._rpn_opts = None
 
+    def get_image_info(self, image_path):
+        item = {}
+        target_scale = self.opts[self.cfg_key]['SCALES'][npr.randint(0, high=len(self.opts[self.cfg_key]['SCALES']))]
+        img = cv2.imread(image_path)
+        img_original_shape = img.shape
+        img, im_scale = self._image_resize(img, target_scale, self.opts[self.cfg_key]['MAX_SIZE'])
+        # restore the [image_height, image_width, scale_factor, max_size]
+        item['image_info'] = np.array([img.shape[0], img.shape[1], im_scale,
+                                       img_original_shape[0], img_original_shape[1]], dtype=np.float)
+        item['visual'] = Image.fromarray(img)
+
+        if self.transform is not None:
+            item['visual'] = self.transform(item['visual'])
+        return item
+
     def __getitem__(self, index):
         # Sample random scales to use for each image in this batch
         item = {'rpn_targets': {}}

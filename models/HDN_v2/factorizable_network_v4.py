@@ -315,6 +315,36 @@ class Factorizable_network(nn.Module):
 
         return rel_cnt, (rel_correct_cnt, phrase_correct_cnt, pred_correct_cnt, region_rois_num), result
 
+    def predict(self, im_data, im_info, gt_objects=None, gt_relationships=None,
+        thr=0.5, nms=-1., triplet_nms=-1., top_Ns = [100],
+        use_gt_boxes=False):
+
+        object_result, predicate_result = self.forward_eval(im_data, im_info,)
+
+        cls_prob_object, bbox_object, object_rois, reranked_score = object_result[:4]
+        cls_prob_predicate, mat_phrase = predicate_result[:2]
+        region_rois_num = predicate_result[2]
+
+        # interpret the model output
+        obj_boxes, obj_scores, obj_cls, subject_inds, object_inds, \
+            subject_boxes, object_boxes, predicate_inds, \
+            sub_assignment, obj_assignment, total_score = \
+                interpret_relationships(cls_prob_object, bbox_object, object_rois,
+                            cls_prob_predicate, mat_phrase, im_info,
+                            nms=nms, top_N=max(top_Ns),
+                            use_gt_boxes=use_gt_boxes,
+                            triplet_nms=triplet_nms,
+                            reranked_score=reranked_score)
+
+        result = {'objects': {
+                            'bbox': obj_boxes,
+                            'scores': obj_scores,
+                            'class': obj_cls,},
+                  'relationships': zip(sub_assignment, obj_assignment, predicate_inds, total_score),
+                 }
+
+        return result
+
     def evaluate_object_detection(self, im_data, im_info, gt_objects,thr=0.5, nms=-1., use_gt_boxes=False):
         gt_objects = gt_objects[0]
         if use_gt_boxes:

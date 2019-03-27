@@ -72,6 +72,8 @@ parser.add_argument('--save_all_from', type=int,
                          ''' then keep all (useful to save disk space)')''')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation and test set')
+parser.add_argument('-p', '--predict', dest='predict', action='store_true',
+                    help='predict model on input image')
 parser.add_argument('--evaluate_object', dest='evaluate_object', action='store_true',
                     help='Evaluate model with object detection')
 parser.add_argument('--use_normal_anchors', action='store_true', help='Whether to use kmeans anchors')
@@ -288,6 +290,16 @@ def main():
                     float(recall[0][idx]) * 100))
         print('============ Done ============')
         save_results(result, None, options['logs']['dir_logs'], is_testing=True)
+        return
+
+    if args.predict:
+        result = model.module.engines.test(test_loader, model, top_Ns,
+                                            nms=args.nms,
+                                            triplet_nms=args.triplet_nms,
+                                            use_gt_boxes=args.use_gt_boxes)
+        print('======= Prediction Result =======')
+        print(result)
+        print('============ Done ============')
         return
 
     if args.evaluate_object:

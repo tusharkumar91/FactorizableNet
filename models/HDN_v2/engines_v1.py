@@ -157,6 +157,32 @@ def test(loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_boxes=False):
     return recall, result
 
 
+def predict(img_path, loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_boxes=False):
+
+    print '========== Predicting ======='
+    model.eval()
+
+    rel_cnt = 0.
+    rel_cnt_correct = np.zeros(2)
+    phrase_cnt_correct = np.zeros(2)
+    pred_cnt_correct = np.zeros(2)
+    total_region_rois_num = 0
+    max_region_rois_num = 0
+    result = []
+
+    item = loader.get_image_info(img_path)
+    input_visual = item['visual'][0].cuda()
+    image_info = item['image_info']
+
+    result = model.module.predict(
+        input_visual, image_info, None, None,
+        top_Ns=top_Ns, nms=nms, triplet_nms=triplet_nms,
+        use_gt_boxes=use_gt_boxes)
+    print('\n====== Done Predicting ====')
+
+    return result
+
+
 def test_object_detection(loader, model, nms=-1., use_gt_boxes=False):
     print '========== Testing ======='
     model.eval()
