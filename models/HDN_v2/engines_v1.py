@@ -169,20 +169,17 @@ def predict(img_path, loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_bo
     total_region_rois_num = 0
     max_region_rois_num = 0
     result = []
-    print("Image path : {}".format(img_path))
-    print(loader)
-    print(type(loader))
     item = loader.get_image_info(img_path)
     input_visual = item['visual'].unsqueeze(0).cuda()
     image_info = [item['image_info']]
 
-    result = model.module.predict(
+    result, subject_inds, object_inds = model.module.predict(
         input_visual, image_info, None, None,
         top_Ns=top_Ns, nms=nms, triplet_nms=triplet_nms,
         use_gt_boxes=use_gt_boxes)
     print('\n====== Done Predicting ====')
 
-    return result
+    return result, subject_inds, object_inds
 
 
 def test_object_detection(loader, model, nms=-1., use_gt_boxes=False):

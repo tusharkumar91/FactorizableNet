@@ -295,17 +295,19 @@ def main():
         return
 
     if args.predict:
-        result = model.module.engines.predict(args.image_path, train_set, model, [20],
+        result, subject_inds, object_inds = model.module.engines.predict(args.image_path, train_set, model, [100],
                                             nms=args.nms,
                                             triplet_nms=args.triplet_nms,
                                             use_gt_boxes=args.use_gt_boxes)
         print('======= Prediction Result =======')
-        print(result)
+        #print(result)
         print('============ Done ============')
+        #for idx in result['objects']['class']:
+        #    print("Sueject {} : {}".format(idx, train_set._object_classes[idx]))
         for relationship in result['relationships']:
-            print("Subject : {} | Rel : {} | Object : {}".format(train_set._object_classes[relationship[0]],
+            print("Subject : {} | Rel : {} | Object : {}".format(train_set._object_classes[result['objects']['class'][relationship[0]]],
                                                                  train_set._predicate_classes[relationship[2]],
-                                                                 train_set._object_classes[relationship[1]]))
+                                                                 train_set._object_classes[result['objects']['class'][relationship[1]]]))
         return
 
     if args.evaluate_object:

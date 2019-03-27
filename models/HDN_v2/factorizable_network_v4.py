@@ -344,7 +344,7 @@ class Factorizable_network(nn.Module):
                   'relationships': zip(sub_assignment, obj_assignment, predicate_inds, total_score),
                  }
 
-        return result
+        return result, subject_inds, object_inds
 
     def evaluate_object_detection(self, im_data, im_info, gt_objects,thr=0.5, nms=-1., use_gt_boxes=False):
         gt_objects = gt_objects[0]
