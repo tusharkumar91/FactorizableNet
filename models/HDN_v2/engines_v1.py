@@ -159,7 +159,6 @@ def test(loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_boxes=False):
 
 def predict(img_path, loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_boxes=False):
 
-    print '========== Predicting ======='
     model.eval()
 
     rel_cnt = 0.
@@ -177,7 +176,6 @@ def predict(img_path, loader, model, top_Ns, nms=-1., triplet_nms=-1., use_gt_bo
         input_visual, image_info, None, None,
         top_Ns=top_Ns, nms=nms, triplet_nms=triplet_nms,
         use_gt_boxes=use_gt_boxes)
-    print('\n====== Done Predicting ====')
 
     return result, subject_inds, object_inds
 

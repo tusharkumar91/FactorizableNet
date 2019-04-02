@@ -9,6 +9,7 @@ import argparse
 import yaml
 import click
 from pprint import pprint
+import json
 # To restore the testing results for further analysis
 import cPickle
 
@@ -23,6 +24,7 @@ import lib.utils.general_utils as utils
 import lib.utils.logger as logger
 import models
 from models.HDN_v2.utils import save_checkpoint, load_checkpoint, save_results, save_detections
+from lib.datasets import COCO_loader
 
 from models.modules.dataParallel import DataParallel
 
@@ -295,23 +297,45 @@ def main():
         return
 
     if args.predict:
-        tic = time.time()
-        result, subject_inds, object_inds = model.module.engines.predict(args.image_path, train_set, model, [100],
+        predict_loader = torch.utils.data.DataLoader(COCO_loader.CocoLoader(), batch_size=1,
+                                                     shuffle=False, num_workers=args.workers)
+        relationship_image_map = {}
+        image_path = "/home/tusharkumar91/WS/MAttNet/data/images/mscoco/images/train2014/"
+        min_score = 0.01
+        tot_time = 0
+        with torch.no_grad():
+            for idx, sample in enumerate(predict_loader):
+                path = image_path + sample['item'][0]
+                tic = time.time()
+                result, subject_inds, object_inds = model.module.engines.predict(path, train_set, model, [100],
                                             nms=args.nms,
                                             triplet_nms=args.triplet_nms,
                                             use_gt_boxes=args.use_gt_boxes)
-        print('======= Prediction Result =======')
-        #print(result)
-        #for idx in result['objects']['class']:
-        #    print("Sueject {} : {}".format(idx, train_set._object_classes[idx]))
-        for relationship in result['relationships']:
-            print("Subject : {} | Rel : {} | Object : {} | Score : {} | bbox : {}".format(train_set._object_classes[result['objects']['class'][relationship[0]]],
-                                                                 train_set._predicate_classes[relationship[2]],
-                                                                              train_set._object_classes[result['objects']['class'][relationship[1]]],
-                                                                              relationship[3], result["objects"]['bbox'][relationship[0]]))
-        tok = time.time()
-        print("Time taken for prediction : {} seconds".format(tok-tic))
-        print("Total Relationships found : {}".format(len(result['relationships'])))
+                
+                #print('======= Prediction Result =======')
+                rel_list = []
+                for relationship in result['relationships']:
+                    #print("Subject : {} | Rel : {} | Object : {} | Score : {} | bbox : {}".format(train_set._object_classes[result['objects']['class'][relationship[0]]],
+                    #                                             train_set._predicate_classes[relationship[2]],
+                    #                                                          train_set._object_classes[result['objects']['class'][relationship[1]]],
+                    #                                                          relationship[3], result["objects"]['bbox'][relationship[0]]))
+                    subject = train_set._object_classes[result['objects']['class'][relationship[0]]]
+                    predicate = train_set._predicate_classes[relationship[2]]
+                    object =  train_set._object_classes[result['objects']['class'][relationship[1]]]
+                    score = relationship[3]
+                    rel_list += [(subject, predicate, object, score.item())]
+                    
+                tok = time.time()
+                tot_time += tok - tic                
+                #print("Time taken for prediction : {} seconds".format(tok-tic))
+                #print("Total Relationships found : {}".format(len(result['relationships'])))
+                relationship_image_map[str(sample['id'][0].item())] = rel_list
+                #print(relationship_image_map)
+                if idx % 25 == 0:
+                    print("Time Spent : {}".format(tot_time))
+                    print("Processed {}/{} images".format(idx+1, len(predict_loader)))
+        with open("sub_rel_obj_coco.json", "w") as f:
+            json.dump(relationship_image_map, f)
         return
 
     if args.evaluate_object:
